@@ -5,7 +5,7 @@ using System.Text;
 
 namespace BrainBit.UI
 {
-    public interface IEllementBuilder
+    public interface IElementBuilder
     {
         List<UIEllement> Build();
     }

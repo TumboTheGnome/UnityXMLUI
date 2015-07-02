@@ -6,14 +6,14 @@ using UnityEngine;
 
 namespace BrainBit.UI
 {
-	public delegate void UIEllementBuilder (UI ui, GameObject self,UIEllementMeta meta,Dictionary<string, string> attributes,object context);
+	public delegate void UIElementBuilder (UI ui, GameObject self,UIElementMeta meta,Dictionary<string, string> attributes,object context);
 
 	public class UIEllement
 	{
 		private string _name;
 		private List<string> _fields = new List<string> ();
 
-		public event UIEllementBuilder Builder;
+		public event UIElementBuilder Builder;
 
 		public UIEllement (string Name)
 		{
@@ -40,7 +40,7 @@ namespace BrainBit.UI
 
 
 		//Creates ellement
-		public UIEllementMeta Make (UI ui, XmlNode node, Transform parent, object context)
+		public UIElementMeta Make (UI ui, XmlNode node, Transform parent, object context)
 		{
 			//Filter Attributes
 			string tags = this._name;
@@ -61,7 +61,7 @@ namespace BrainBit.UI
 			GameObject g = new GameObject (this._name);
 			g.transform.parent = parent;
 
-			UIEllementMeta meta  = new UIEllementMeta (g,node, tags);
+			UIElementMeta meta  = new UIElementMeta (g,node, tags);
 
 			if (this.Builder != null) {
 				this.Builder (ui, g, meta, attrs, context);

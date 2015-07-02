@@ -6,25 +6,25 @@ using System.Collections.Generic;
 
 namespace BrainBit.UI
 {
-	public delegate void UIEllementBinding();
-    public class UIEllementMeta:IEquatable<UIEllementMeta>, IEnumerable<UIEllementMeta>
+	public delegate void UIElementBinding();
+    public class UIElementMeta:IEquatable<UIElementMeta>, IEnumerable<UIElementMeta>
     {
-		private UIEllementMeta _parent;
+		private UIElementMeta _parent;
         private string _tags;
         private GameObject _object;
 		private XmlNode _node;
 		private RectTransform _rect;
 		private string _bindPath = null;
-		public event UIEllementBinding UpdateBinding;
-		private List<UIEllementMeta> _children = new List<UIEllementMeta>();
+		public event UIElementBinding UpdateBinding;
+		private List<UIElementMeta> _children = new List<UIElementMeta>();
 		public bool ContinueRenderChildren = true; //Wasn't sure how else to toggle the render pattern.
 
 
-		public UIEllementMeta(GameObject Object, XmlNode Node, string Tags){
+		public UIElementMeta(GameObject Object, XmlNode Node, string Tags){
 			this._init (Object, Node, Tags);
 		}
 
-		public UIEllementMeta(GameObject Object, XmlNode Node)
+		public UIElementMeta(GameObject Object, XmlNode Node)
 		{
 			this._init (Object, Node, "");
 		}
@@ -84,7 +84,7 @@ namespace BrainBit.UI
 			}
 		}
 
-		public UIEllementMeta AddChild(UIEllementMeta child)
+		public UIElementMeta AddChild(UIElementMeta child)
 		{
 			if(child != null)
 			{
@@ -96,7 +96,7 @@ namespace BrainBit.UI
 			return this;
 		}
 
-		public UIEllementMeta Parent{
+		public UIElementMeta Parent{
 			get{
 				return this._parent;
 			}
@@ -115,7 +115,7 @@ namespace BrainBit.UI
 			}
 		}
 
-		public UIEllementMeta RemoveChild(UIEllementMeta child)
+		public UIElementMeta RemoveChild(UIElementMeta child)
 		{
 			this._children.Remove (child);
 			return this;
@@ -127,11 +127,11 @@ namespace BrainBit.UI
 			}
 		}
 
-		public UIEllementMeta ClearChildren()
+		public UIElementMeta ClearChildren()
 		{
 			Debug.Log (this._object.transform.childCount);
 			this._children.ForEach (x => x.Delete ());
-			this._children = new List<UIEllementMeta> ();
+			this._children = new List<UIElementMeta> ();
 			return this;
 		}
 
@@ -153,7 +153,7 @@ namespace BrainBit.UI
 			}
 
 			//Debug.Log (this._children.Count);
-			foreach (UIEllementMeta child in this._children) {
+			foreach (UIElementMeta child in this._children) {
 				//Debug.Log ((child == null)+" "+this.Tags);
 			if(child != null)
 				{
@@ -165,7 +165,7 @@ namespace BrainBit.UI
 
 		#region IEquatable implementation
 
-		public bool Equals (UIEllementMeta other)
+		public bool Equals (UIElementMeta other)
 		{
 			return this._object.GetInstanceID() == other._object.GetInstanceID();
 		}
@@ -174,7 +174,7 @@ namespace BrainBit.UI
 
 		#region IEnumerable implementation
 		
-		public IEnumerator<UIEllementMeta> GetEnumerator ()
+		public IEnumerator<UIElementMeta> GetEnumerator ()
 		{
 			for (int i = 0; i < this._children.Count; i++) {
 				yield return this._children[i];

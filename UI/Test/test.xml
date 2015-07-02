@@ -1,8 +1,11 @@
   <div max="1,1" min="0,0">
   	<div id="image" min="0,0" max="0.75,0.75" background="Background" renderMode="Sliced">
     	<text size="12" font="Arial" color="#5831BD" min ="0,0" max="1,1" bind="Name">this is my test</text>
+    	<button background="Background" min="0.5,0.25" max="1,1" onClick="Random" renderMode="Sliced">
+    		<text size="40" font="Arial" min="0,0" max="1,1">Random</text>
+    	</button>
   	</div>
   	<div foreach="Test" id="repeat" min="0,0" max="0.75,0.75">
-  		<text font-size="15" font="Arial" color="black" min="0,0" max="1,0.1" bind="value"></text>
+  		<text size="15" font="Arial" color="black" min="0,0" max="1,0.1" bind="value"></text>
   	</div>
   </div>

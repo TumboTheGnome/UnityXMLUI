@@ -3,6 +3,6 @@ using System.Collections;
 
 namespace BrainBit.UI{
 	public interface IUIBindable{
-		UIEllementMeta View{ get; set; }
+		UIElementMeta View{ get; set; }
 	}
 }

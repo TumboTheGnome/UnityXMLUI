@@ -10,7 +10,7 @@ using UnityEngine.UI;
 
 namespace BrainBit.UI
 {
-	public class RulesBuilderBase : IEllementBuilder
+	public class RulesBuilderBase : IElementBuilder
 	{
 		protected Dictionary<string, builderRules> propertyBuilderConfig = new Dictionary<string, builderRules> ();
 		protected Dictionary<string, List<string>> ellements = new Dictionary<string, List<string>> ();
@@ -18,9 +18,9 @@ namespace BrainBit.UI
 		protected class builderRules
 		{
 			private List<string> _reqFields;
-			private UIEllementBuilder _builder;
+			private UIElementBuilder _builder;
 
-			public builderRules (List<string> RequiredFields, UIEllementBuilder Builder)
+			public builderRules (List<string> RequiredFields, UIElementBuilder Builder)
 			{
 				this._builder = Builder;
 				this._reqFields = RequiredFields;
@@ -33,7 +33,7 @@ namespace BrainBit.UI
 				}
 			}
 
-			public UIEllementBuilder PropertyBuilder {
+			public UIElementBuilder PropertyBuilder {
 				get {
 					return this._builder;
 				}
@@ -54,10 +54,12 @@ namespace BrainBit.UI
 			this.propertyBuilderConfig.Add ("foreachChild", new builderRules (new List<string> (){"foreach"}, this.foreachChild));
 			this.propertyBuilderConfig.Add ("textFont", new builderRules (new List<string> (){"font"}, this.textFont));
 			this.propertyBuilderConfig.Add ("textFontSize", new builderRules (new List<string> (){"size"}, this.textFontSize));
+			this.propertyBuilderConfig.Add ("click", new builderRules (new List<string> (){ "onClick" }, this.bindClick));
 
 
 			this.ellements.Add ("div", new List<string> (){"position", "imgMaterial", "imgColor", "imgBackground", "imgRenderMode", "bindView", "foreachChild"});
 			this.ellements.Add ("text", new List<string> (){"position", "textMaterial", "textColor", "bindText", "textFont", "textFontSize"}); 
+			this.ellements.Add ("button", new List<string> (){"position", "imgMaterial", "imgColor", "imgRenderMode", "imgBackground", "click"});
 		}
 
 		public List<UIEllement> Build ()
@@ -81,15 +83,14 @@ namespace BrainBit.UI
 		}
 
 		/* Start Binding */ 
-		protected void bindView (UI render, GameObject self, UIEllementMeta meta, Dictionary<string, string> attributes, object context)
+		protected void bindView (UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
 		{
 			if (context.GetType ().GetInterfaces ().Contains (typeof(IUIBindable)) && meta.Node.ParentNode == null) {
 				IUIBindable bindable = (IUIBindable)context;
 				bindable.View = meta;
 			}
 		}
-
-		protected void bindText (UI render, GameObject self, UIEllementMeta meta, Dictionary<string, string> attributes, object context)
+		protected void bindText (UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
 		{
 			if (attributes.ContainsKey ("bind")) {
 				Text txt = this.getText (self, meta.Node);
@@ -101,7 +102,7 @@ namespace BrainBit.UI
 					meta.BindPath = bind;
 				}
 
-				UIEllementBinding binding = () => {
+				UIElementBinding binding = () => {
 
 					if(meta.BindPath != null)
 					{
@@ -139,11 +140,33 @@ namespace BrainBit.UI
 				meta.UpdateBinding += binding;
 			}
 		}
+
+		protected void bindImg (UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
+		{
+			
+		}
+
+		protected void bindClick(UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
+		{
+			if (attributes.ContainsKey ("onClick")) {
+				Button btn = this.getButton (self, meta.Node);
+
+
+				btn.onClick.AddListener (() => {
+					Type type = context.GetType();
+					MethodInfo info = type.GetMethod(attributes["onClick"]);
+					if(info != null)
+					{
+						info.Invoke(context, null);	
+					}
+				});
+			}
+		}
+			
 		/*End Binding*/
 
 		/*Start Text*/
-
-		protected void textMaterial (UI render, GameObject self, UIEllementMeta meta, Dictionary<string, string> attributes, object context)
+		protected void textMaterial (UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
 		{
 			if (attributes.ContainsKey ("material") && UIAssets.Self != null) {
 				Text txt = this.getText (self, meta.Node);
@@ -151,7 +174,7 @@ namespace BrainBit.UI
 			}
 		}
 
-		protected void textColor (UI render, GameObject self, UIEllementMeta meta, Dictionary<string, string> attributes, object context)
+		protected void textColor (UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
 		{
 			if (attributes.ContainsKey ("color")) {
 				Text txt = this.getText (self, meta.Node);
@@ -159,7 +182,7 @@ namespace BrainBit.UI
 			}
 		}
 
-		protected void textFont (UI render, GameObject self, UIEllementMeta meta, Dictionary<string, string> attributes, object context)
+		protected void textFont (UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
 		{
 			if (attributes.ContainsKey ("font") && UIAssets.Self != null) {
 				Text txt = this.getText (self, meta.Node);
@@ -172,7 +195,7 @@ namespace BrainBit.UI
 			}
 		}
 
-		protected void textFontSize (UI render, GameObject self, UIEllementMeta meta, Dictionary<string, string> attributes, object context)
+		protected void textFontSize (UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
 		{
 			if (attributes.ContainsKey ("size")) {
 				Text txt = this.getText (self, meta.Node);
@@ -184,7 +207,7 @@ namespace BrainBit.UI
 
 		/*Start Image*/
 
-		protected void imageColor (UI render, GameObject self, UIEllementMeta meta, Dictionary<string, string> attributes, object context)
+		protected void imageColor (UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
 		{
 			if (attributes.ContainsKey ("color")) {
 				Image img = this.getImage (self, meta.Node);
@@ -192,7 +215,7 @@ namespace BrainBit.UI
 			}
 		}
 
-		protected void imgBackground (UI render, GameObject self, UIEllementMeta meta, Dictionary<string, string> attributes, object context)
+		protected void imgBackground (UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
 		{
 			if (attributes.ContainsKey ("background") && UIAssets.Self != null) {
 				Image img = this.getImage (self, meta.Node);
@@ -209,7 +232,7 @@ namespace BrainBit.UI
 			}
 		}
 
-		protected void imageRenderMode (UI render, GameObject self, UIEllementMeta meta, Dictionary<string, string> attributes, object context)
+		protected void imageRenderMode (UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
 		{
 
 			if (attributes.ContainsKey ("renderMode")) {
@@ -218,7 +241,7 @@ namespace BrainBit.UI
 			}
 		}
 
-		protected void imgMaterial (UI render, GameObject self, UIEllementMeta meta, Dictionary<string, string> attributes, object context)
+		protected void imgMaterial (UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
 		{
 			if (attributes.ContainsKey ("material") && UIAssets.Self != null) {
 				Image img = this.getImage (self, meta.Node);
@@ -230,12 +253,12 @@ namespace BrainBit.UI
 		}
 		/*End Image*/
 
-		protected void foreachChild (UI render, GameObject self, UIEllementMeta meta, Dictionary<string, string> attributes, object context)
+		protected void foreachChild (UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
 		{
 
 			if (attributes.ContainsKey ("foreach")) {
 
-				UIEllementBinding binding = () => {
+				UIElementBinding binding = () => {
 
 					meta.ContinueRenderChildren = false;
 
@@ -258,8 +281,8 @@ namespace BrainBit.UI
 
 							//Toggle on ellements that we'll be using, disable the ones we won't be using
 							int ellementsNeeded = 0;
-							List<UIEllementMeta> active = new List<UIEllementMeta> ();
-							foreach (UIEllementMeta child in meta) {
+							List<UIElementMeta> active = new List<UIElementMeta> ();
+							foreach (UIElementMeta child in meta) {
 								//Enable ellements 
 								if (ellementsNeeded < data.Count) {
 									child.Object.SetActive (true);
@@ -284,7 +307,7 @@ namespace BrainBit.UI
 			}
 		}
 
-		protected void groupLayout (List<UIEllementMeta> meta)
+		protected void groupLayout (List<UIElementMeta> meta)
 		{
 			if (meta != null) {
 				for (int i = 0; i< meta.Count; i++) {
@@ -320,7 +343,7 @@ namespace BrainBit.UI
 
 
 		//Calculate the positioning of an ellement
-		protected void position (UI renderer, GameObject self, UIEllementMeta meta, Dictionary<string, string> attributes, object context)
+		protected void position (UI renderer, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
 		{
 			Vector2 min = Vector2.zero;
 			Vector2 max = Vector2.one;
@@ -443,6 +466,17 @@ namespace BrainBit.UI
 				img = g.AddComponent<Image> ();
 			}
 			return img;
+		}
+
+		protected Button getButton(GameObject g, XmlNode node)
+		{
+			Button btn = g.GetComponent<Button> ();
+			if (btn == null) {
+				btn = g.AddComponent<Button> ();
+			}
+
+			return btn;
+
 		}
 	}
 }

@@ -20,13 +20,6 @@ public class UITEST : MonoBehaviour
 		this._ui.Canvas.worldCamera = Camera.main;
 
 	}
-
-	void OnGUI ()
-	{
-		if (GUILayout.Button ("TEST")) {
-			this._data.Random ();
-		}
-	}
 }
 
 public class testData:IUIBindable
@@ -34,11 +27,11 @@ public class testData:IUIBindable
 	public const int Length = 10;
 	private string _name;
 	private List<string> _names;
-	private UIEllementMeta _view;
+	private UIElementMeta _view;
 
 	#region IUIBInd implementation
 
-	public UIEllementMeta View {
+	public UIElementMeta View {
 		get {
 			return this._view;
 		}

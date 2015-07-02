@@ -11,20 +11,20 @@ namespace BrainBit.UI
 {
 	public class UI
 	{
-		private List<UIEllementMeta> _ellements = new List<UIEllementMeta> ();
+		private List<UIElementMeta> _ellements = new List<UIElementMeta> ();
 		private Dictionary<string, UIEllement> _handlers = new Dictionary<string, UIEllement> ();
 		private RectTransform _root;
 		private Canvas _canvas;
 		private EventSystem _events;
-		private UIEllementMeta _metaRoot;
-		private List<UIEllementMeta> _selection;
+		private UIElementMeta _metaRoot;
+		private List<UIElementMeta> _selection;
         
 		public UI ()
 		{
 			this._init ();
 		}
 
-		public UI (IEllementBuilder builder)
+		public UI (IElementBuilder builder)
 		{
 			this._init ();
 			if (builder != null) {
@@ -39,9 +39,13 @@ namespace BrainBit.UI
 			GameObject k = new GameObject ("UI Root");
 			this._canvas = k.AddComponent<Canvas> ();
 			this._root = k.GetComponent<RectTransform> ();
+			k.AddComponent<CanvasScaler> ();
+			k.AddComponent<GraphicRaycaster> ();
 			
 			GameObject events = new GameObject ("UI Events");
 			this._events = events.AddComponent<EventSystem> ();
+			events.AddComponent<StandaloneInputModule> ();
+			events.AddComponent<TouchInputModule> ();
 		}
 
 		public Canvas Canvas {
@@ -56,7 +60,7 @@ namespace BrainBit.UI
 			}
 		}
 
-		public List<UIEllementMeta> Get {
+		public List<UIElementMeta> Get {
 			get {
 				return this._selection;
 			}
@@ -115,7 +119,7 @@ namespace BrainBit.UI
 			return this;
 		}
 
-		public UIEllementMeta Render (XmlNode node, Transform parent, object context)
+		public UIElementMeta Render (XmlNode node, Transform parent, object context)
 		{
 			return this._renderNode (node, parent, context);
 		}
@@ -123,8 +127,8 @@ namespace BrainBit.UI
 		private void _render (string xml, object context)
 		{
 			if (!String.IsNullOrEmpty (xml)) {
-				this._selection = new List<UIEllementMeta> ();
-				UIEllementMeta root = null;
+				this._selection = new List<UIElementMeta> ();
+				UIElementMeta root = null;
 
 				XmlReader reader = XmlReader.Create (new StringReader (xml));
 				XmlDocument document = new XmlDocument ();
@@ -138,10 +142,10 @@ namespace BrainBit.UI
 			}
 		}
 
-		private UIEllementMeta _renderNode (XmlNode node, Transform parent, object context)
+		private UIElementMeta _renderNode (XmlNode node, Transform parent, object context)
 		{
 			if (this._handlers.ContainsKey (node.Name)) {
-				UIEllementMeta k = _handlers [node.Name].Make (this, node, parent, context);
+				UIElementMeta k = _handlers [node.Name].Make (this, node, parent, context);
 				this._selection.Add (k);
 				this._ellements.Add (k);
 
