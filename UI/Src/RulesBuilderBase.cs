@@ -13,7 +13,7 @@ namespace BrainBit.UI
 	public class RulesBuilderBase : IElementBuilder
 	{
 		protected Dictionary<string, builderRules> propertyBuilderConfig = new Dictionary<string, builderRules> ();
-		protected Dictionary<string, List<string>> ellements = new Dictionary<string, List<string>> ();
+		protected Dictionary<string, List<string>> elements = new Dictionary<string, List<string>> ();
 
 		protected class builderRules
 		{
@@ -42,6 +42,7 @@ namespace BrainBit.UI
 
 		public RulesBuilderBase ()
 		{
+			//Registering element components. 
 			this.propertyBuilderConfig.Add ("position", new builderRules (new List<string> (){"min", "max"}, this.position));
 			this.propertyBuilderConfig.Add ("textMaterial", new builderRules (new List<string> (){"material"}, this.textMaterial));
 			this.propertyBuilderConfig.Add ("textColor", new builderRules (new List<string> (){"color"}, this.textColor));
@@ -55,11 +56,12 @@ namespace BrainBit.UI
 			this.propertyBuilderConfig.Add ("textFont", new builderRules (new List<string> (){"font"}, this.textFont));
 			this.propertyBuilderConfig.Add ("textFontSize", new builderRules (new List<string> (){"size"}, this.textFontSize));
 			this.propertyBuilderConfig.Add ("click", new builderRules (new List<string> (){ "onClick" }, this.bindClick));
+			this.propertyBuilderConfig.Add ("show", new builderRules (new List<string> (){ "show" }, this.show));
 
-
-			this.ellements.Add ("div", new List<string> (){"position", "imgMaterial", "imgColor", "imgBackground", "imgRenderMode", "bindView", "foreachChild"});
-			this.ellements.Add ("text", new List<string> (){"position", "textMaterial", "textColor", "bindText", "textFont", "textFontSize"}); 
-			this.ellements.Add ("button", new List<string> (){"position", "imgMaterial", "imgColor", "imgRenderMode", "imgBackground", "click"});
+			//Regestering element config
+			this.elements.Add ("div", new List<string> (){"position", "imgMaterial", "imgColor", "imgBackground", "imgRenderMode", "bindView", "foreachChild", "show"});
+			this.elements.Add ("text", new List<string> (){"position", "textMaterial", "textColor", "bindText", "textFont", "textFontSize", "show"}); 
+			this.elements.Add ("button", new List<string> (){"position", "imgMaterial", "imgColor", "imgRenderMode", "imgBackground", "click", "show"});
 		}
 
 		public List<UIEllement> Build ()
@@ -67,7 +69,7 @@ namespace BrainBit.UI
 
 			List<UIEllement> r = new List<UIEllement> ();
 
-			foreach (KeyValuePair<string,List<string>> config in this.ellements) {
+			foreach (KeyValuePair<string,List<string>> config in this.elements) {
 				UIEllement ellement = new UIEllement (config.Key);
 
 				foreach (string property in config.Value) {
@@ -253,6 +255,25 @@ namespace BrainBit.UI
 		}
 		/*End Image*/
 
+		/*Verbs*/
+
+		protected void show(UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
+		{
+			if (attributes.ContainsKey ("show")) {
+				meta.UpdateBinding += () => {
+					Type type = context.GetType();
+					PropertyInfo info = type.GetProperty(attributes["show"]);
+					if(info != null)
+					{
+						if(info.PropertyType == typeof(bool))
+						{
+							self.SetActive((bool)info.GetValue(context, null));
+						}
+					}
+				};
+			}
+		}
+
 		protected void foreachChild (UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
 		{
 
@@ -272,7 +293,8 @@ namespace BrainBit.UI
 
 							/* Create needed ellements */
 							if (meta.Object.transform.childCount < data.Count) {
-								foreach (object entry in data) {
+								int needed = data.Count - meta.Object.transform.childCount;
+								for(int i = 0; i< needed; i++){
 									foreach (XmlNode child in meta.Node.ChildNodes) {
 										meta.AddChild (render.Render (child, self.transform, context));
 									}
@@ -473,6 +495,10 @@ namespace BrainBit.UI
 			Button btn = g.GetComponent<Button> ();
 			if (btn == null) {
 				btn = g.AddComponent<Button> ();
+
+				Navigation n = new Navigation ();
+				n.mode = Navigation.Mode.None;
+				btn.navigation = n;
 			}
 
 			return btn;

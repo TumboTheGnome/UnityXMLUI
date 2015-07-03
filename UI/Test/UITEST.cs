@@ -28,6 +28,7 @@ public class testData:IUIBindable
 	private string _name;
 	private List<string> _names;
 	private UIElementMeta _view;
+	private bool _show;
 
 	#region IUIBInd implementation
 
@@ -53,10 +54,21 @@ public class testData:IUIBindable
 		}
 	}
 
+	public bool ShowDialog{
+		get{
+			return this._show;
+		}
+	}
+
+	public void UpdateDialog()
+	{
+		this._show = !this._show;
+		this._view.Update ();
+	}
+
 	public void Random ()
 	{
 		this._populate ();
-
 		if (this._view != null) {
 			this._view.Update ();
 		}

@@ -11,10 +11,10 @@ The UI system in Unity 4.6 is fantastic, but there isn’t an efficient method f
 #Design
 
 ##UI
-The UI class provides a wrapper for managing an invidiual UI, with methods for searching contained elements and rendering templates. When instantiating a UI a IElementBuilder object must be supplied to establish the UI’s rendering rules.  
+The UI class provides a wrapper for managing an individual UI, with methods for searching contained elements and rendering templates. When instantiating a UI a IElementBuilder object must be supplied to establish the UI’s rendering rules.  
 
 ##RulesBuilderBase
-Currently this is the default implementation of IElementBuilder. It provides support for three types of elements, div, text, and button, along with a collection of tags which can be used with each of them. It provides a good base for building custom UI implementations providing utility methods for parsing Vector2’s from text, colors by hex or name, etc. 
+This is the default implementation of IElementBuilder. It provides support for three types of elements, div, text, and button, along with a collection of tags which can be used with each of them. It provides a good base for building custom UI implementations providing utility methods for parsing Vector2’s from text, colors by hex or name, etc. 
 
 ##UIAssets
 This global provides access to the fonts, sprites, and materials available for use in the UI. Currently it is very simple, but I would like to ultimately provide support for loading content from asset bundles and providing content variant support. 
