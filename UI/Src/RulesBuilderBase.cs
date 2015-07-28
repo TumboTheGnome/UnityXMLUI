@@ -12,56 +12,45 @@ namespace BrainBit.UI
 {
 	public class RulesBuilderBase : IElementBuilder
 	{
-		protected Dictionary<string, builderRules> propertyBuilderConfig = new Dictionary<string, builderRules> ();
+		protected Dictionary<string, UIElementBuilder> propertyBuilderConfig = new Dictionary<string, UIElementBuilder> ();
 		protected Dictionary<string, List<string>> elements = new Dictionary<string, List<string>> ();
 
-		protected class builderRules
-		{
-			private List<string> _reqFields;
-			private UIElementBuilder _builder;
 
-			public builderRules (List<string> RequiredFields, UIElementBuilder Builder)
-			{
-				this._builder = Builder;
-				this._reqFields = RequiredFields;
-
-			}
-
-			public List<string> Fields {
-				get {
-					return this._reqFields;
-				}
-			}
-
-			public UIElementBuilder PropertyBuilder {
-				get {
-					return this._builder;
-				}
-			}
-		}
 
 		public RulesBuilderBase ()
 		{
+
+
 			//Registering element components. 
-			this.propertyBuilderConfig.Add ("position", new builderRules (new List<string> (){"min", "max"}, this.position));
-			this.propertyBuilderConfig.Add ("textMaterial", new builderRules (new List<string> (){"material"}, this.textMaterial));
-			this.propertyBuilderConfig.Add ("textColor", new builderRules (new List<string> (){"color"}, this.textColor));
-			this.propertyBuilderConfig.Add ("bindView", new builderRules (new List<string> (), this.bindView));
-			this.propertyBuilderConfig.Add ("bindText", new builderRules (new List<string> (){"bind"}, this.bindText));
-			this.propertyBuilderConfig.Add ("imgMaterial", new builderRules (new List<string> (){"material"}, this.imgMaterial));
-			this.propertyBuilderConfig.Add ("imgColor", new builderRules (new List<string> (){"color"}, this.imageColor));
-			this.propertyBuilderConfig.Add ("imgBackground", new builderRules (new List<string> (){"background"}, this.imgBackground));
-			this.propertyBuilderConfig.Add ("imgRenderMode", new builderRules (new List<string> (){"renderMode"}, this.imageRenderMode));
-			this.propertyBuilderConfig.Add ("foreachChild", new builderRules (new List<string> (){"foreach"}, this.foreachChild));
-			this.propertyBuilderConfig.Add ("textFont", new builderRules (new List<string> (){"font"}, this.textFont));
-			this.propertyBuilderConfig.Add ("textFontSize", new builderRules (new List<string> (){"size"}, this.textFontSize));
-			this.propertyBuilderConfig.Add ("click", new builderRules (new List<string> (){ "onClick" }, this.bindClick));
-			this.propertyBuilderConfig.Add ("show", new builderRules (new List<string> (){ "show" }, this.show));
+			this.propertyBuilderConfig.Add ("position", this.position);
+			this.propertyBuilderConfig.Add ("textMaterial", this.textMaterial);
+			this.propertyBuilderConfig.Add ("textColor", this.textColor);
+			this.propertyBuilderConfig.Add ("bindView", this.attachView);
+			this.propertyBuilderConfig.Add ("bindText", this.bindText);
+			this.propertyBuilderConfig.Add ("imgMaterial", this.imgMaterial);
+			this.propertyBuilderConfig.Add ("imgColor", this.imageColor);
+			this.propertyBuilderConfig.Add ("imgBackground",this.imgBackground);
+			this.propertyBuilderConfig.Add ("imgRenderMode", this.imageRenderMode);
+			this.propertyBuilderConfig.Add ("foreachChild", this.foreachChild);
+			this.propertyBuilderConfig.Add ("textFont", this.textFont);
+			this.propertyBuilderConfig.Add ("textFontSize", this.textFontSize);
+			this.propertyBuilderConfig.Add ("click", this.bindClick);
+			this.propertyBuilderConfig.Add ("show", this.show);
+			this.propertyBuilderConfig.Add ("imgBind", this.bindImg);
+			this.propertyBuilderConfig.Add ("txtDefault", this.txtDefaultValue);
+			this.propertyBuilderConfig.Add ("sldrInit", this.sliderInit);
+			this.propertyBuilderConfig.Add ("sldrBind", this.bindSlider);
+			this.propertyBuilderConfig.Add ("dragable", this.dragInit);
+			this.propertyBuilderConfig.Add ("dragRecieve", this.dragRecieveInit);
+			this.propertyBuilderConfig.Add ("dragRecieveBind", this.dragRecieveBind);
+			this.propertyBuilderConfig.Add ("divBind", this.bindDiv);
+
 
 			//Regestering element config
-			this.elements.Add ("div", new List<string> (){"position", "imgMaterial", "imgColor", "imgBackground", "imgRenderMode", "bindView", "foreachChild", "show"});
-			this.elements.Add ("text", new List<string> (){"position", "textMaterial", "textColor", "bindText", "textFont", "textFontSize", "show"}); 
-			this.elements.Add ("button", new List<string> (){"position", "imgMaterial", "imgColor", "imgRenderMode", "imgBackground", "click", "show"});
+			this.elements.Add ("div", new List<string> (){"position", "imgMaterial", "imgColor", "imgBackground", "imgRenderMode", "bindView", "divBind", "foreachChild", "show", "imgBind", "dragable", "dragRecieve", "dragRecieveBind"});
+			this.elements.Add ("text", new List<string> (){"txtDefault","position", "textMaterial", "textColor", "bindText", "textFont", "textFontSize", "show"}); 
+			this.elements.Add ("button", new List<string> (){"position", "imgMaterial", "imgColor", "imgRenderMode", "imgBackground", "click", "show", "imgBind"});
+			this.elements.Add ("slider", new List<string> (){"position", "sldrInit", "imgMaterial", "imgColor", "imgBackground", "imgRenderMode", "imgBind", "sldrBind"});
 		}
 
 		public List<UIEllement> Build ()
@@ -74,8 +63,7 @@ namespace BrainBit.UI
 
 				foreach (string property in config.Value) {
 					if (this.propertyBuilderConfig.ContainsKey (property)) { 
-						ellement.Fields.AddRange (this.propertyBuilderConfig [property].Fields);
-						ellement.Builder += this.propertyBuilderConfig [property].PropertyBuilder;
+						ellement.Builder += this.propertyBuilderConfig [property];
 					}
 				}
 				r.Add (ellement);
@@ -85,19 +73,55 @@ namespace BrainBit.UI
 		}
 
 		/* Start Binding */ 
-		protected void bindView (UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
+		protected void attachView (UI render, GameObject self, UIElementMeta meta, object context)
 		{
 			if (context.GetType ().GetInterfaces ().Contains (typeof(IUIBindable)) && meta.Node.ParentNode == null) {
 				IUIBindable bindable = (IUIBindable)context;
 				bindable.View = meta;
 			}
 		}
-		protected void bindText (UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
-		{
-			if (attributes.ContainsKey ("bind")) {
-				Text txt = this.getText (self, meta.Node);
 
-				string bind = attributes ["bind"];
+		protected void bindDiv(UI render, GameObject self, UIElementMeta meta, object context)
+		{
+			if (meta.Node.Attributes ["bind"] != null) {	
+
+				UIElementBinding bind = ()=>{
+				if(meta.BindPath != null)
+				{
+					string propName = null;
+					int propIndex = -1;
+					
+					//Array indexed values are refed using #name:#index
+					int pos = meta.BindPath.IndexOf (":");
+					if (pos != -1) {
+						propName = meta.BindPath.Substring (0, pos);
+						propIndex = Convert.ToInt32 (meta.BindPath.Substring (pos+1, meta.BindPath.Length - (pos + 1)));
+					} else {
+						propName = meta.BindPath;
+					}
+					
+					Type type = context.GetType ();
+					PropertyInfo info = type.GetProperty (propName);
+					if (info != null) {
+						 if (info.PropertyType.GetInterfaces ().Contains (typeof(IList)) && propIndex != -1) { // Because I'm lazey, currently only implementing for lists
+							IList value = (IList)info.GetValue (context, null);
+							meta.Data = value [propIndex];
+							return;
+						}
+					} 
+
+					meta.Data = null;
+				}
+				};
+				meta.UpdateBinding += bind;
+			}
+		}
+
+		protected void bindText (UI render, GameObject self, UIElementMeta meta, object context)
+		{
+			if (meta.Node.Attributes["bind"] != null) {
+
+				string bind = meta.Node.Attributes ["bind"].Value;
 
 				//If the bind is set to value, we presume the super structure contianing the ellement is handling the setting of the bindpath. Otherwise we pull the bind path.
 				if (bind != "value") {
@@ -124,15 +148,15 @@ namespace BrainBit.UI
 					PropertyInfo info = type.GetProperty (propName);
 					if (info != null) {
 						if (propIndex == -1) {
-							txt.text = info.GetValue (context, null).ToString ();
+							meta.Text.text = info.GetValue (context, null).ToString ();
 						} else if (info.PropertyType.GetInterfaces ().Contains (typeof(IList))) { // Because I'm lazey, currently only implementing for lists
 							IList value = (IList)info.GetValue (context, null);
-							txt.text = value [propIndex].ToString ();
+							meta.Text.text = value [propIndex].ToString ();
 						} else {
-							txt.text = meta.Node.Value;
+							meta.Text.text = meta.Node.Value;
 						}
 					} else {
-						txt.text = meta.Node.Value;
+						meta.Text.text = meta.Node.Value;
 					}
 					}
 				};
@@ -143,20 +167,65 @@ namespace BrainBit.UI
 			}
 		}
 
-		protected void bindImg (UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
+		protected void bindImg (UI render, GameObject self, UIElementMeta meta, object context)
 		{
-			
+			if (meta.Node.Attributes["bindImage"] != null) {
+				meta.Data = context;
+				UIElementBinding binding = ()=>{
+				Type type = context.GetType();
+				PropertyInfo info = type.GetProperty(meta.Node.Attributes["bindImage"].Value);
+
+				if(info != null)
+				{
+					if(info.PropertyType == typeof(Sprite))
+					{
+						meta.Image.sprite = (Sprite)info.GetValue(context, null);
+
+					}
+				}
+				};
+
+				binding.Invoke();
+				meta.UpdateBinding += binding;
+			}
 		}
 
-		protected void bindClick(UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
+		protected void bindSlider(UI render, GameObject self, UIElementMeta meta, object context)
 		{
-			if (attributes.ContainsKey ("onClick")) {
-				Button btn = this.getButton (self, meta.Node);
 
+			if (meta.Node.Attributes ["bind"] != null) {
+			
+				meta.Data = context;
+				UIElementBinding binding = ()=>{
 
-				btn.onClick.AddListener (() => {
 					Type type = context.GetType();
-					MethodInfo info = type.GetMethod(attributes["onClick"]);
+					PropertyInfo info = type.GetProperty(meta.Node.Attributes["bind"].Value);
+					if(info != null)
+					{
+						float value = 0;
+						if(info.PropertyType == typeof(float))
+						{
+							value = (float)info.GetValue(context, null);
+						}
+
+						meta.Slider.normalizedValue = value;
+					}
+
+				};
+
+				binding.Invoke();
+				meta.UpdateBinding += binding;
+			
+			}
+		}
+
+		protected void bindClick(UI render, GameObject self, UIElementMeta meta, object context)
+		{
+			if (meta.Node.Attributes["onClick"] != null) {
+				meta.Data = context;
+				meta.Button.onClick.AddListener (() => {
+					Type type = context.GetType();
+					MethodInfo info = type.GetMethod(meta.Node.Attributes["onClick"].Value);
 					if(info != null)
 					{
 						info.Invoke(context, null);	
@@ -167,41 +236,55 @@ namespace BrainBit.UI
 			
 		/*End Binding*/
 
+		/*Start Slider*/
+		protected void sliderInit(UI render, GameObject self, UIElementMeta meta, object context){
+
+			meta.Slider.fillRect.anchorMin = Vector2.zero;
+			meta.Slider.fillRect.anchorMax = Vector2.one;
+			
+			meta.Slider.fillRect.localScale = Vector3.one;
+			meta.Slider.fillRect.SetSizeWithCurrentAnchors (RectTransform.Axis.Horizontal, 1);
+			meta.Slider.fillRect.SetSizeWithCurrentAnchors (RectTransform.Axis.Vertical, 1);
+			meta.Slider.fillRect.offsetMin = Vector2.zero;
+			meta.Slider.fillRect.offsetMax = Vector2.zero;	
+		}
+
+		/*End Slider*/
+
 		/*Start Text*/
-		protected void textMaterial (UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
+		protected void txtDefaultValue(UI render, GameObject self, UIElementMeta meta, object context)
 		{
-			if (attributes.ContainsKey ("material") && UIAssets.Self != null) {
-				Text txt = this.getText (self, meta.Node);
-				txt.material = UIAssets.Self.Materials.Find (x => x.name == attributes ["material"]);
+			meta.Text.text = meta.Node.InnerText;
+		}
+
+		protected void textMaterial (UI render, GameObject self, UIElementMeta meta, object context)
+		{
+			if (meta.Node.Attributes["material"] != null && UIAssets.Self != null) {
+				meta.Text.material = UIAssets.Self.Materials.Find (x => x.name == meta.Node.Attributes["material"].Value);
 			}
 		}
 
-		protected void textColor (UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
+		protected void textColor (UI render, GameObject self, UIElementMeta meta, object context)
 		{
-			if (attributes.ContainsKey ("color")) {
-				Text txt = this.getText (self, meta.Node);
-				txt.color = readColor (attributes ["color"]);
+			if (meta.Node.Attributes["color"] != null) {
+				meta.Text.color = readColor (meta.Node.Attributes ["color"].Value);
 			}
 		}
 
-		protected void textFont (UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
+		protected void textFont (UI render, GameObject self, UIElementMeta meta, object context)
 		{
-			if (attributes.ContainsKey ("font") && UIAssets.Self != null) {
-				Text txt = this.getText (self, meta.Node);
-
-				Font font = UIAssets.Self.Fonts.Find (x => x.name == attributes ["font"]);
+			if (meta.Node.Attributes["font"] != null && UIAssets.Self != null) {
+				Font font = UIAssets.Self.Fonts.Find (x => x.name == meta.Node.Attributes ["font"].Value);
 				if (font != null) {
-
-					txt.font = font;
+					meta.Text.font = font;
 				}
 			}
 		}
 
-		protected void textFontSize (UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
+		protected void textFontSize (UI render, GameObject self, UIElementMeta meta, object context)
 		{
-			if (attributes.ContainsKey ("size")) {
-				Text txt = this.getText (self, meta.Node);
-				txt.fontSize = Convert.ToInt32 (attributes ["size"]);
+			if (meta.Node.Attributes["size"] != null) {
+				meta.Text.fontSize = Convert.ToInt32 (meta.Node.Attributes ["size"].Value);
 			}
 		}
 
@@ -209,60 +292,92 @@ namespace BrainBit.UI
 
 		/*Start Image*/
 
-		protected void imageColor (UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
+		protected void imageColor (UI render, GameObject self, UIElementMeta meta, object context)
 		{
-			if (attributes.ContainsKey ("color")) {
-				Image img = this.getImage (self, meta.Node);
-				img.color = this.readColor (attributes ["color"]);
+			if (meta.Node.Attributes["color"] != null) {
+				meta.Image.color = this.readColor (meta.Node.Attributes ["color"].Value);
 			}
 		}
 
-		protected void imgBackground (UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
+		protected void imgBackground (UI render, GameObject self, UIElementMeta meta, object context)
 		{
-			if (attributes.ContainsKey ("background") && UIAssets.Self != null) {
-				Image img = this.getImage (self, meta.Node);
-				
-				if (attributes ["background"].IndexOf ("$") == 0) {
+			if (meta.Node.Attributes["image"] != null && UIAssets.Self != null) {
+				if (meta.Node.Attributes ["image"].Value.IndexOf ("$") == 0) {
 					
 				} else {
 					
-					Sprite s = UIAssets.Self.Images.Find (x => x.name == attributes ["background"]);
+					Sprite s = UIAssets.Self.Images.Find (x => x.name == meta.Node.Attributes ["image"].Value);
 					if (s != null) {
-						img.sprite = s;
+						meta.Image.sprite = s;
 					}
 				}
 			}
 		}
 
-		protected void imageRenderMode (UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
+		protected void imageRenderMode (UI render, GameObject self, UIElementMeta meta, object context)
 		{
 
-			if (attributes.ContainsKey ("renderMode")) {
-				Image img = this.getImage (self, meta.Node);
-				img.type = (Image.Type)Enum.Parse (typeof(Image.Type), attributes ["renderMode"]);
+			if (meta.Node.Attributes["renderMode"] != null) {
+				meta.Image.type = (Image.Type)Enum.Parse (typeof(Image.Type), meta.Node.Attributes["renderMode"].Value);
 			}
 		}
 
-		protected void imgMaterial (UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
+		protected void imgMaterial (UI render, GameObject self, UIElementMeta meta, object context)
 		{
-			if (attributes.ContainsKey ("material") && UIAssets.Self != null) {
-				Image img = this.getImage (self, meta.Node);
-				Material m = UIAssets.Self.Materials.Find (x => x.name == attributes ["material"]);
+			if (meta.Node.Attributes["material"] != null && UIAssets.Self != null) {
+				Material m = UIAssets.Self.Materials.Find (x => x.name == meta.Node.Attributes ["material"].Value);
 				if (m != null) {
-					img.material = m;
+					meta.Image.material = m;
 				}
 			}
 		}
 		/*End Image*/
 
+		/*Start Drag*/
+
+		protected void dragInit(UI render, GameObject self, UIElementMeta meta, object context)
+		{
+			if (meta.Node.Attributes ["dragable"] != null) {
+				Dragable drag = meta.Dragable;
+				drag.Meta = meta;
+			}
+		}
+
+		protected void dragRecieveInit(UI render, GameObject self, UIElementMeta meta, object context)
+		{
+			if (meta.Node.Attributes ["recieveDrag"] != null) {
+				DragableRecieve recieve = meta.DragableRecieve;
+			}
+		}
+
+		protected void dragRecieveBind(UI render, GameObject self, UIElementMeta meta, object context)
+		{
+			if (meta.Node.Attributes ["recieveDragBind"] != null) {
+				string name = meta.Node.Attributes["recieveDragBind"].Value;
+
+				UIElementBinding bind = () => {;
+					DragRecieve del = (DragRecieve)Delegate.CreateDelegate(typeof(DragRecieve), context, name);
+					if(del != null)
+					{
+						meta.DragableRecieve.Dragable += del;
+					}else{
+						Debug.LogError("Method "+name+" does not match delegate DragRecieve");
+					}
+				};
+
+				meta.UpdateBinding += bind;
+			}
+		}
+		/*End Drag*/
+
 		/*Verbs*/
 
-		protected void show(UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
+		protected void show(UI render, GameObject self, UIElementMeta meta, object context)
 		{
-			if (attributes.ContainsKey ("show")) {
+			if (meta.Node.Attributes["show"] != null) {
 				meta.UpdateBinding += () => {
 					Type type = context.GetType();
-					PropertyInfo info = type.GetProperty(attributes["show"]);
+					PropertyInfo info = type.GetProperty(meta.Node.Attributes["show"].Value);
 					if(info != null)
 					{
 						if(info.PropertyType == typeof(bool))
@@ -274,16 +389,16 @@ namespace BrainBit.UI
 			}
 		}
 
-		protected void foreachChild (UI render, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
+		protected void foreachChild (UI render, GameObject self, UIElementMeta meta, object context)
 		{
 
-			if (attributes.ContainsKey ("foreach")) {
+			if (meta.Node.Attributes["foreach"] != null) {
 
 				UIElementBinding binding = () => {
 
 					meta.ContinueRenderChildren = false;
 
-					string propName = attributes ["foreach"];
+					string propName = meta.Node.Attributes ["foreach"].Value;
 					Type t = context.GetType ();
 					PropertyInfo prop = t.GetProperty (propName);
 			
@@ -359,24 +474,26 @@ namespace BrainBit.UI
 					meta [i].Rect.offsetMax = Vector2.zero;
 					meta [i].BindPath += ":" + i;
 					meta [i].Update ();
+
+					//Debug.Log(meta[i].BindPath);
 				}
 			}
 		}
 
 
 		//Calculate the positioning of an ellement
-		protected void position (UI renderer, GameObject self, UIElementMeta meta, Dictionary<string, string> attributes, object context)
+		protected void position (UI renderer, GameObject self, UIElementMeta meta, object context)
 		{
 			Vector2 min = Vector2.zero;
 			Vector2 max = Vector2.one;
 
 			//If the min and max fields have been set use them, otherwise default to fullscreen
-			if (attributes.ContainsKey ("min")) {
-				min = readCord (attributes ["min"]);
+			if (meta.Node.Attributes["min"] != null) {
+				min = readCord (meta.Node.Attributes["min"].Value);
 			}
 
-			if (attributes.ContainsKey ("max")) {
-				max = readCord (attributes ["max"]);
+			if (meta.Node.Attributes["max"] != null) {
+				max = readCord (meta.Node.Attributes ["max"].Value);
 			}
 
 			meta.Rect.anchorMin = min;
@@ -392,6 +509,7 @@ namespace BrainBit.UI
 		//Parse points, in decimal or fraction form to, vector2 
 		protected Vector2 readCord (string input)
 		{
+			input = input.Replace(" ", "");
 			int split = input.IndexOf (',');
 			string strX = input.Substring (0, split);
 			string strY = input.Substring (split, input.Length - split);
@@ -468,41 +586,6 @@ namespace BrainBit.UI
 
 				return c;
 			}
-		}
-
-		protected Text getText (GameObject g, XmlNode node)
-		{
-			Text txt = g.GetComponent<Text> ();
-			if (txt == null) {
-				txt = g.AddComponent<Text> ();
-
-				txt.text = node.InnerText;
-			}
-			return txt;
-		}
-
-		protected Image getImage (GameObject g, XmlNode node)
-		{
-			Image img = g.GetComponent<Image> ();
-			if (img == null) {
-				img = g.AddComponent<Image> ();
-			}
-			return img;
-		}
-
-		protected Button getButton(GameObject g, XmlNode node)
-		{
-			Button btn = g.GetComponent<Button> ();
-			if (btn == null) {
-				btn = g.AddComponent<Button> ();
-
-				Navigation n = new Navigation ();
-				n.mode = Navigation.Mode.None;
-				btn.navigation = n;
-			}
-
-			return btn;
-
 		}
 	}
 }

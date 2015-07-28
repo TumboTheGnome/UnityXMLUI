@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace BrainBit.UI
 {
-	public delegate void UIElementBuilder (UI ui, GameObject self,UIElementMeta meta,Dictionary<string, string> attributes,object context);
+	public delegate void UIElementBuilder (UI ui, GameObject self,UIElementMeta meta,object context);
 
 	public class UIEllement
 	{
@@ -44,19 +44,7 @@ namespace BrainBit.UI
 		{
 			//Filter Attributes
 			string tags = this._name;
-			Dictionary<string, string> attrs = new Dictionary<string, string> ();
-			foreach (XmlAttribute field in node.Attributes) {
 
-				if(field.Name.ToLower() == "id")
-				{
-					tags += " "+field.Value;
-				}else if (this._fields.Contains (field.Name)) {
-					if (!attrs.ContainsKey (field.Name)) {
-						attrs.Add (field.Name, field.Value);
-					}
-				}
-			}
-            
 			//Creating object.
 			GameObject g = new GameObject (this._name);
 			g.transform.parent = parent;
@@ -64,7 +52,7 @@ namespace BrainBit.UI
 			UIElementMeta meta  = new UIElementMeta (g,node, tags);
 
 			if (this.Builder != null) {
-				this.Builder (ui, g, meta, attrs, context);
+				this.Builder (ui, g, meta, context);
 			}
 
 			return meta;

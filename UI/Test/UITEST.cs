@@ -16,7 +16,7 @@ public class UITEST : MonoBehaviour
 	{
 		this._ui = new UI (new RulesBuilderBase ());
 		this._ui.Load (this.XML.text, this._data);
-		this._ui.Canvas.renderMode = RenderMode.ScreenSpaceCamera;
+		this._ui.Canvas.renderMode = RenderMode.ScreenSpaceOverlay;
 		this._ui.Canvas.worldCamera = Camera.main;
 
 	}
@@ -29,6 +29,10 @@ public class testData:IUIBindable
 	private List<string> _names;
 	private UIElementMeta _view;
 	private bool _show;
+	private Sprite _img;
+
+	private float _slider = 1;
+	private List<Item> items;
 
 	#region IUIBInd implementation
 
@@ -45,6 +49,16 @@ public class testData:IUIBindable
 
 	public testData ()
 	{
+		if (UIAssets.Self != null) {
+			this._img = UIAssets.Self.Images[0];
+		}
+
+		this.items = new List<Item> (){new Item(), new Item(), new Item()};
+		this.items [0].Name = "Sword";
+		this.items [1].Name = "Spear";
+		this.items [2].Name = "Laser";
+
+
 		this._populate ();
 	}
 
@@ -60,6 +74,28 @@ public class testData:IUIBindable
 		}
 	}
 
+	public Sprite Image{
+		get{
+			return this._img;
+		}
+
+		set{
+			this._img = value;
+		}
+	}
+
+	public List<Item> Items{
+		get{
+			return this.items;
+		}
+	}
+
+	public float SliderValue{
+		get{
+			return this._slider;
+		}
+	}
+
 	public void UpdateDialog()
 	{
 		this._show = !this._show;
@@ -68,6 +104,12 @@ public class testData:IUIBindable
 
 	public void Random ()
 	{
+		this._slider -= 0.1f;
+		if (this._slider <= 0) {
+			this._slider = 1;
+		}
+
+		this._img = UIAssets.Self.Images [1];
 		this._populate ();
 		if (this._view != null) {
 			this._view.Update ();
@@ -78,6 +120,21 @@ public class testData:IUIBindable
 		get {
 			return this._names;
 		}
+	}
+
+	public void DragBind(Dragable drag)
+	{
+		if (drag != null) {
+			if(drag.Meta != null)
+			{
+				if(drag.Meta.Data != null)
+				{
+				Item i = (Item)drag.Meta.Data;
+				Debug.LogWarning(i.Name);
+				}
+			}
+		}
+		//Debug.Log ("The drag is: "+drag);
 	}
 
 	private string _randomString ()
@@ -100,4 +157,9 @@ public class testData:IUIBindable
 			this._names.Add (this._randomString ());
 		}
 	}
+}
+
+public class Item{
+	public string Name;
+	public int Cost;
 }

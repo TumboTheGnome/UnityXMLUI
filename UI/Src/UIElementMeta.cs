@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Xml;
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -9,6 +10,7 @@ namespace BrainBit.UI
 	public delegate void UIElementBinding();
     public class UIElementMeta:IEquatable<UIElementMeta>, IEnumerable<UIElementMeta>
     {
+		public object Data;
 		private UIElementMeta _parent;
         private string _tags;
         private GameObject _object;
@@ -19,6 +21,13 @@ namespace BrainBit.UI
 		private List<UIElementMeta> _children = new List<UIElementMeta>();
 		public bool ContinueRenderChildren = true; //Wasn't sure how else to toggle the render pattern.
 
+		private Image _image;
+		private Text _text;
+		private Button _button;
+		private Slider _slider;
+		private Image _sliderImg;
+		private Dragable _drag;
+		private DragableRecieve _dragRecieve;
 
 		public UIElementMeta(GameObject Object, XmlNode Node, string Tags){
 			this._init (Object, Node, Tags);
@@ -41,10 +50,96 @@ namespace BrainBit.UI
 			}
 		}
 
+		public Image Image{
+			get{
+				if(this._image == null)
+				{
+					this._image = this._object.AddComponent<Image> ();
+				
+				}
+				return this._image;
+			}
+		}
+
+		public Text Text{
+			get{
+			if(this._text == null)
+				{
+					this._text = this._object.AddComponent<Text>();
+				}
+
+				return this._text;
+			}
+		}
+
+		public Slider Slider{
+			get{
+				if(this._slider == null)
+				{
+					this._slider = this._object.AddComponent<Slider>();
+
+					GameObject fillRect = new GameObject("FillRect");
+					this._sliderImg = fillRect.AddComponent<Image>();
+
+					RectTransform trans = fillRect.GetComponent<RectTransform>();
+					trans.SetParent(this._slider.transform);
+
+					this._slider.fillRect = trans;
+					this._slider.transition = Selectable.Transition.None;
+
+					Navigation n = new Navigation ();
+					n.mode = Navigation.Mode.None;
+					this._slider.navigation = n;
+				}
+
+				return this._slider;
+			}
+		}
+
+		public Image SliderFillRectImg{
+			get{
+				return this._sliderImg;
+			}
+		}
+
+		public Button Button{
+			get{
+				if(this._button == null)
+				{
+					this._button = this._object.AddComponent<Button>();
+					Navigation n = new Navigation ();
+					n.mode = Navigation.Mode.None;
+					this._button.navigation = n;
+				}
+				return this._button;
+			}
+		}
 
 		public RectTransform Rect{
 			get{
 				return this._rect;
+			}
+		}
+
+		public Dragable Dragable{
+			get{
+				if(this._drag == null)
+				{
+					this._drag = this._object.AddComponent<Dragable>();
+				}
+
+				return this._drag;
+			}
+		}
+
+		public DragableRecieve DragableRecieve{
+			get{
+				if(this._dragRecieve == null)
+				{
+					this._dragRecieve = this._object.AddComponent<DragableRecieve>();
+				}
+
+				return this._dragRecieve;
 			}
 		}
 
