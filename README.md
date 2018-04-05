@@ -8,17 +8,17 @@ The UI system in Unity 4.6 is fantastic, but there isn’t an efficient method f
 4. Drag UI/Test/test.xml to the XML field on UITEST.cs
 5. Hit play. 
 
-#Design
+# Design
 
-##UI
+## UI
 The UI class provides a wrapper for managing an individual UI, with methods for searching contained elements and rendering templates. When instantiating a UI a IElementBuilder object must be supplied to establish the UI’s rendering rules.  
 
-##RulesBuilderBase
+## RulesBuilderBase
 This is the default implementation of IElementBuilder. It provides support for three types of elements, div, text, and button, along with a collection of tags which can be used with each of them. It provides a good base for building custom UI implementations providing utility methods for parsing Vector2’s from text, colors by hex or name, etc. 
 
-##UIAssets
+## UIAssets
 This global provides access to the fonts, sprites, and materials available for use in the UI. Currently it is very simple, but I would like to ultimately provide support for loading content from asset bundles and providing content variant support. 
 
-##IUIBindable 
+## IUIBindable 
 Implementing this interface is required for all objects UI elements will be bound to. Objects implementing this interface receive a reference to the UI element they bind on. To push an update to the bound UI element and all its children simply call the  simply call the Update method on the bound view. *An example of this can be found in the UITEST.cs script*.   
 
